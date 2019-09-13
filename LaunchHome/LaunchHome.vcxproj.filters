@@ -36,6 +36,9 @@
     <ClInclude Include="MyButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaunchHome.cpp">
@@ -51,6 +54,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MyButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
