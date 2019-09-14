@@ -120,6 +120,18 @@
     <Image Include="res\exit_hover.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\close.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\close_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\minisize.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\minisize_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="resource.hm">

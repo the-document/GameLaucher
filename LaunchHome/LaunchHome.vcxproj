@@ -210,6 +210,8 @@
     <Image Include="res\bitmap5.bmp" />
     <Image Include="res\bitmap6.bmp" />
     <Image Include="res\clickStart.bmp" />
+    <Image Include="res\close.bmp" />
+    <Image Include="res\close_hover.bmp" />
     <Image Include="res\disableStart.bmp" />
     <Image Include="res\exit.bmp" />
     <Image Include="res\exit_hover.bmp" />
@@ -218,6 +220,8 @@
     <Image Include="res\home.bmp" />
     <Image Include="res\home_nomal.bmp" />
     <Image Include="res\LaunchHome.ico" />
+    <Image Include="res\minisize.bmp" />
+    <Image Include="res\minisize_hover.bmp" />
     <Image Include="res\readystart.bmp" />
     <Image Include="res\register.bmp" />
     <Image Include="res\register_hover.bmp" />
