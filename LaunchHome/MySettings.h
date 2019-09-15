@@ -9,6 +9,10 @@ public:
 	static MySettings* Instance();
 	~MySettings();
 
-	char* backgroundUrl;
+	LPWSTR homeUrl;
+	LPWSTR registerUrl;
+	LPWSTR tokenUrl;
+	LPWSTR groupUrl;
+	LPWSTR exitUrl;
 };
 
