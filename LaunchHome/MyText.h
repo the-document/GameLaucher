@@ -16,7 +16,14 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg HBRUSH CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/);
+
+public:
+	int index=-1;
+	int height_line=20;
+	CFont font;
 protected:
 	
+public:
+	afx_msg void OnPaint();
 };
 
