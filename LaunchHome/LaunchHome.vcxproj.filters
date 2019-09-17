@@ -33,6 +33,12 @@
     <ClInclude Include="MySettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyButton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaunchHome.cpp">
@@ -45,6 +51,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MySettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,5 +75,67 @@
     <Image Include="res\background.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\readystart.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\disableStart.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\clickStart.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bitmap5.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\home.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\bitmap6.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\home_nomal.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\register.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\register_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\token.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\token_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\group.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\group_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\exit.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\exit_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\close.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\close_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\minisize.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\minisize_hover.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resource.hm">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
