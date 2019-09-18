@@ -1,2 +1,22 @@
-﻿  LaunchHomeDlg.cpp
-  LaunchHome.vcxproj -> D:\IT\Project customer\LaunchGame\GameLaucher\x64\Debug\LaunchHome.exe
+﻿  SingleThreadFileDownload.cpp
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.h(2): warning C4005: '_AFXDLL': macro redefinition
+  d:\github\gamelaucher\launchhome\stdafx.cpp: note: see previous definition of '_AFXDLL'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(25): warning C4101: 'cookieHistory': unreferenced local variable
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(60): warning C4996: 'wcscpy': This function or variable may be unsafe. Consider using wcscpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\corecrt_wstring.h(123): note: see declaration of 'wcscpy'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(61): warning C4996: 'wcscpy': This function or variable may be unsafe. Consider using wcscpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\corecrt_wstring.h(123): note: see declaration of 'wcscpy'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(149): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(133): note: see declaration of 'strcpy'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(150): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(90): note: see declaration of 'strcat'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(151): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\string.h(90): note: see declaration of 'strcat'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(279): warning C4996: 'wcscpy': This function or variable may be unsafe. Consider using wcscpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\corecrt_wstring.h(123): note: see declaration of 'wcscpy'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(280): warning C4996: 'wcscat': This function or variable may be unsafe. Consider using wcscat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\corecrt_wstring.h(100): note: see declaration of 'wcscat'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(331): warning C4996: '_snwprintf': This function or variable may be unsafe. Consider using _snwprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17134.0\ucrt\corecrt_wstdio.h(1667): note: see declaration of '_snwprintf'
+d:\github\gamelaucher\launchhome\singlethreadfiledownload.cpp(126): warning C4715: 'SingleThreadFileDownload::TerminateDownload': not all control paths return a value
+  LaunchHome.vcxproj -> D:\GitHub\GameLaucher\x64\Debug\LaunchHome.exe

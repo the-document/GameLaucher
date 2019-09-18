@@ -1,4 +1,5 @@
-﻿#include "SingleThreadFileDownload.h"
+﻿#include "stdafx.h"
+#include "SingleThreadFileDownload.h"
 
 //Biến lưu giữ các event đánh dấu trạng thái.
 std::unordered_map<HINTERNET, HANDLE> hConnectEvent;
