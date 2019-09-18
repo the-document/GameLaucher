@@ -124,16 +124,16 @@ bool SingleThreadFileDownload::TerminateDownload()
 	}
 }
 
-bool SingleThreadFileDownload::UnpackDownloadedFile()
+bool SingleThreadFileDownload::UnpackDownloadedFile(wchar_t* pathToZippedFile, wchar_t* pathToUnzipFolder)
 {
-	CString cstring;
-	CT2A ascii(cstring);
-	char *url = ascii.m_psz;
-	char *file_name = strrchr(url, '/') + 1;
-	cstring = _T("Extracting file... ");
-	cstring += file_name;
+	//CString cstring;
+	//CT2A ascii(cstring);
+	//char *url = ascii.m_psz;
+	//char *file_name = strrchr(url, '/') + 1;
+	//cstring = _T("Extracting file... ");
+	//cstring += file_name;
 
-	CString unpack_path;
+	//CString unpack_path;
 	// Giải nén file .zip
 	SHELLEXECUTEINFO ShExecInfo = { 0 };
 	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -143,22 +143,23 @@ bool SingleThreadFileDownload::UnpackDownloadedFile()
 	ShExecInfo.lpFile = _T("Unpack.exe");
 
 	//Command extract
-	WCHAR str3[MAX_PATH + 50];
-	char cmd[MAX_PATH + MAX_PATH];
-	strcpy(cmd, " x ../Patch/");
-	strcat(cmd, file_name);
-	strcat(cmd, " -o../ -aoa");
+	WCHAR cmd[MAX_PATH + MAX_PATH];
+	wcscpy(cmd, L" x ");
+	wcscat(cmd, pathToZippedFile);
+	wcscat(cmd, L" -o ");
+	wcscat(cmd, pathToUnzipFolder);
+	wcscat(cmd, L" -aoa");
+
 	//mbstowcs(wtext, text, strlen(text)+1);
-	MultiByteToWideChar(CP_ACP, 0, cmd, -1, str3, 4096);
-	ShExecInfo.lpParameters = str3;
+	ShExecInfo.lpParameters = cmd;
 
 	ShExecInfo.lpDirectory = NULL;
 	ShExecInfo.nShow = SW_HIDE;
 	ShExecInfo.hInstApp = NULL;
 	ShellExecuteEx(&ShExecInfo);
 	WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
-	cstring = unpack_path;
-	DeleteFile(cstring);
+	/*cstring = unpack_path;*/
+	DeleteFile(pathToZippedFile);
 
 	//Reset busy status
 	return TRUE;
@@ -208,9 +209,11 @@ void SingleThreadFileDownload::GetFileSize()
 		}
 	}
 
-	DWORD sizeOfFileSize = 4; //Int.
+	
+	wchar_t headerBuffer[250];
+	DWORD sizeOfFileSize = sizeof(headerBuffer); //Int.
 
-	while (!HttpQueryInfo(tempConn, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&downloadSize, &sizeOfFileSize, NULL))
+	while (!HttpQueryInfo(tempConn, HTTP_QUERY_CONTENT_LENGTH, headerBuffer, &sizeOfFileSize, NULL))
 	{
 		DWORD errorCode = GetLastError();
 		if (errorCode == ERROR_INSUFFICIENT_BUFFER)
@@ -225,6 +228,8 @@ void SingleThreadFileDownload::GetFileSize()
 			break;
 		}
 	}
+
+	downloadSize = _wtoi(headerBuffer);
 
 	InternetCloseHandle(tempConn);
 }
