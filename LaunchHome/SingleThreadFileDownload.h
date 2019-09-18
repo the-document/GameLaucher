@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <shellapi.h>
 #include "InternetDownloadStatus.h"
 
@@ -17,7 +18,7 @@ class SingleThreadFileDownload
 private:
 
 	//Biến lưu giữ giá trị timeout mặc định.
-	const DWORD dwDefaultTimeout = 20000;
+	const DWORD dwDefaultTimeout = 300000;
 	
 	//Biến lưu giữ kích thước của buffer tải về.
 	const DWORD dwSize = 1024;
@@ -37,6 +38,9 @@ private:
 	//Biến lưu giữ URL cần tải về.
 	wchar_t * url = nullptr;
 
+	//Biến báo hiệu URL không hợp lệ.
+	bool invalidURL = false;
+
 	//Biến lưu giữ kết nối đến URL.
 	HINTERNET connection;
 
@@ -45,7 +49,10 @@ private:
 	unsigned long long endRange = 0;
 
 	//Biến lưu giữ header tuỳ chọn để submit chung với file.
-	wchar_t * header;
+	wchar_t * header = nullptr;
+
+	//Biến lưu giữ ngày cuối cùng mà file được thay đổi (trong lần tải này).
+	wchar_t lastModified[250];
 
 	//Biến lưu giữ kích thước cần tải về.
 	ULONGLONG downloadSize;
@@ -61,6 +68,9 @@ private:
 
 	//Biến báo hiệu chương trình vẫn còn đang trong quá trình tải.
 	bool isRunning = false;
+
+	//Biến báo hiệu chương trình cho phép lấy một đoạn của file về.
+	bool isResumable = false;
 
 public:
 	SingleThreadFileDownload(HINTERNET _internet, const wchar_t* _url, const wchar_t* _pathToFile, ULONGLONG _beginRange = 0, ULONGLONG _endRange = 0);

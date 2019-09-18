@@ -110,12 +110,12 @@ bool SingleThreadFileDownload::TerminateDownload()
 	if (isRunning)
 		return false;
 
-	std::ofstream outInfo;
+	std::wofstream outInfo;
 	outInfo.open(pathToInfoFile, std::ios::out);
 	//Ghi lại số byte đã tải được xuống đĩa cứng.
-	if (outInfo.is_open())
+	if (isResumable && outInfo.is_open())
 	{
-		outInfo << downloadedBytes << std::endl;
+		outInfo << downloadedBytes << L"\n" << lastModified;
 		if (outInfo.fail())
 			std::cout << "\nFailed to write file !\n";
 		outInfo.close();
@@ -168,15 +168,15 @@ bool SingleThreadFileDownload::UnpackDownloadedFile(wchar_t* pathToZippedFile, w
 SingleThreadFileDownload::~SingleThreadFileDownload()
 {
 	if (header != nullptr && header != NULL)
-		delete header;
+		delete []header;
 	if (pathToFile != nullptr)
-		delete pathToFile;
+		delete []pathToFile;
 	if (pathToInfoFile != nullptr)
-		delete pathToInfoFile;
+		delete[] pathToInfoFile;
 	if (url != nullptr)
-		delete url;
+		delete []url;
 	if (lpBuffer != nullptr && lpBuffer != NULL)
-		delete lpBuffer;
+		delete []lpBuffer;
 	try
 	{
 		file.Close();
@@ -192,6 +192,7 @@ void SingleThreadFileDownload::GetFileSize()
 	HINTERNET tempConn;
 	//Options cho việc mở kết nối với URL.
 	DWORD connectionOptions = INTERNET_FLAG_NEED_FILE | INTERNET_FLAG_HYPERLINK | INTERNET_FLAG_RESYNCHRONIZE | INTERNET_FLAG_RELOAD;
+	retryGetFileSize:
 	bool connectionResult = tempConn = InternetOpenUrlW(internet, url, NULL, NULL, connectionOptions, 1);
 
 	DWORD error = GetLastError();
@@ -201,6 +202,7 @@ void SingleThreadFileDownload::GetFileSize()
 		if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
 		{
 			std::cout << "\nRequest timeout for getting content length !";
+			goto retryGetFileSize;
 		}
 		else
 		{
@@ -229,6 +231,65 @@ void SingleThreadFileDownload::GetFileSize()
 		}
 	}
 
+	int statusCode = -1;
+	DWORD sizeOfStatusCode = sizeof(statusCode);
+	while (!HttpQueryInfo(tempConn, HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER, (LPVOID)&statusCode, &sizeOfStatusCode, NULL))
+	{
+		DWORD errorCode = GetLastError();
+		if (errorCode == ERROR_INSUFFICIENT_BUFFER)
+		{
+			std::cout << "\nInsufficent File Size Buffer !";
+			downloadSize = 0;
+			break;
+		}
+		else
+		{
+			downloadSize = 0;
+			break;
+		}
+	}
+	wchar_t rangeAcceptResponse[250];
+	DWORD sizeOfAcceptResponse = sizeof(rangeAcceptResponse);
+	while (!HttpQueryInfo(tempConn, HTTP_QUERY_ACCEPT_RANGES, rangeAcceptResponse, &sizeOfAcceptResponse, NULL))
+	{
+		DWORD errorCode = GetLastError();
+		if (errorCode == ERROR_INSUFFICIENT_BUFFER)
+		{
+			std::cout << "\nInsufficent File Size Buffer !";
+			downloadSize = 0;
+			break;
+		}
+		else
+		{
+			downloadSize = 0;
+			break;
+		}
+	}
+	DWORD sizeOfLastModified = sizeof(lastModified);
+	while (!HttpQueryInfo(tempConn, HTTP_QUERY_LAST_MODIFIED, lastModified, &sizeOfLastModified, NULL))
+	{
+		DWORD errorCode = GetLastError();
+		if (errorCode == ERROR_INSUFFICIENT_BUFFER)
+		{
+			std::cout << "\nInsufficent File Size Buffer !";
+			downloadSize = 0;
+			break;
+		}
+		else
+		{
+			downloadSize = 0;
+			break;
+		}
+	}
+
+	//Nếu server không hỗ trợ resume thì chỉnh biến cờ.
+	if (wcscmp(rangeAcceptResponse, L"bytes"))
+		isResumable = false;
+	else
+		isResumable = true;
+
+	if (statusCode != 200)
+		invalidURL = true;
 	downloadSize = _wtoi(headerBuffer);
 
 	InternetCloseHandle(tempConn);
@@ -238,6 +299,7 @@ void SingleThreadFileDownload::MakeConnection()
 {
 	DWORD connectionOptions = INTERNET_FLAG_NEED_FILE | INTERNET_FLAG_HYPERLINK | INTERNET_FLAG_RESYNCHRONIZE | INTERNET_FLAG_RELOAD;
 	bool connectionResult;
+	retryMakeConnection:
 	if (header != NULL)
 		connectionResult = connection = InternetOpenUrlW(internet, url, header, -1L, connectionOptions, 1);
 	else
@@ -254,6 +316,7 @@ void SingleThreadFileDownload::MakeConnection()
 		if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
 		{
 			std::cout << "\nTimeout for connection " << " in completing request event !";
+			goto retryMakeConnection;
 		}
 		else
 		{
@@ -283,7 +346,7 @@ void SingleThreadFileDownload::ProcessRange()
 	wcscpy(pathToInfoFile, pathToFile);
 	wcscat(pathToInfoFile, L".sav");
 
-	std::ifstream ifInf;
+	std::wifstream ifInf;
 
 	ifInf.open((pathToInfoFile), std::ios::in);
 	if (ifInf.fail())
@@ -293,17 +356,22 @@ void SingleThreadFileDownload::ProcessRange()
 	}
 
 	//Đọc số byte đã tải về từ file.
-	char sizeDownloaded[250];
-	ifInf >> sizeDownloaded;
-
+	wchar_t sizeDownloaded[250];
+	wchar_t savedLastModified[250];
+	ifInf.getline(sizeDownloaded,250);
+	ifInf.getline(savedLastModified, 250);
 	//Đọc xong thì đóng kết nối luôn.
 	ifInf.close();
 
 	//Mặc định sẽ tải từ vị trí beginRange tới vị trí endRange.
 	//Trong trường hợp đã tải được 1 lượng nhất định thì ta tải tiếp chứ không tải lại từ đầu.
-	ULONGLONG downloadedSize = atoi(sizeDownloaded);
+	ULONGLONG downloadedSize = _wtoi(sizeDownloaded);
 
 	bool isFilePrevDownloadedCorrupt = false;
+
+	//Nếu ngày chỉnh sửa không giống, tải lại từ đầu.
+	if (wcscmp(savedLastModified, lastModified))
+		isFilePrevDownloadedCorrupt = true;
 
 	if (downloadedSize != 0)
 	{
@@ -370,11 +438,18 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 			{
 				std::cout << "\nTimeout at downloading at connection : " + 0 << " ! ";
 				returnResult.statusCode = StatusCode::TimedOutReadingData;
+				return returnResult;
 			}
 			else
 			{
 				std::cout << "\nNOOOOOOOOOOOO\n\n\n";
 			}
+		}
+		else
+		{
+			returnResult.downloadedBytes = -1;
+			returnResult.downloadedPercent = -1;
+			returnResult.statusCode = StatusCode::TimedOutReadingData;
 		}
 	}
 	//Tải được rồi thì phải reset đi chớ.
@@ -385,8 +460,7 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 		returnResult.downloadedBytes = returnResult.totalBytes;
 		returnResult.downloadedPercent = 100.0;
 		returnResult.statusCode = StatusCode::Success;
-		//Lưu lại luôn để biết là tải xong rồi đừng tải nữa.
-		TerminateDownload();
+		
 		return returnResult;
 	}
 	//Ghi vào file.
@@ -407,17 +481,36 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 	//Tải xong rồi thì tắt cờ.
 	isRunning = false;
 
+	//Xét xem nếu đủ 100% rồi thì Terminate luôn.
+	if (returnResult.downloadedPercent == 100.0)
+		TerminateDownload();
+
 	return returnResult;
 }
 
 bool SingleThreadFileDownload::SetupDownload()
 {
 	//Mở file ra để tải về và lưu.
-	if (file.Open((pathToFile), CFile::modeWrite | CFile::modeCreate | CFile::modeNoTruncate) == FALSE)
+	if (isResumable && downloadedBytes != 0)
 	{
-		std::cout << "\nCannot open file for writing !\n";
-		return false;
+		if (file.Open((pathToFile), CFile::modeWrite | CFile::modeCreate | CFile::modeNoTruncate) == FALSE)
+		{
+			std::cout << "\nCannot open file for writing !\n";
+			return false;
+		}
 	}
-	file.SeekToEnd();
-	return true;
+	else
+	{
+		if (file.Open((pathToFile), CFile::modeWrite | CFile::modeCreate) == FALSE)
+		{
+			std::cout << "\nCannot open file for writing !\n";
+			return false;
+		}
+	}
+		
+	if (isResumable)
+		file.SeekToEnd();
+	else
+		file.SeekToBegin();
+	return true & invalidURL;
 }
