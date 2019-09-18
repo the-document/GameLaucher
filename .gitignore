@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+.vs/LaunchGame/v15/.suo
+.vs/LaunchGame/v15/Browse.VC.db
+.vs/LaunchGame/v15/ipch/7aed7eaaed71bb1.ipch
