@@ -385,6 +385,8 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 		returnResult.downloadedBytes = returnResult.totalBytes;
 		returnResult.downloadedPercent = 100.0;
 		returnResult.statusCode = StatusCode::Success;
+		//Lưu lại luôn để biết là tải xong rồi đừng tải nữa.
+		TerminateDownload();
 		return returnResult;
 	}
 	//Ghi vào file.
@@ -405,9 +407,6 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 	//Tải xong rồi thì tắt cờ.
 	isRunning = false;
 
-	//Lưu lại luôn để biết là tải xong rồi đừng tải nữa.
-	TerminateDownload();
-	
 	return returnResult;
 }
 
