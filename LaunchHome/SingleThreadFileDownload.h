@@ -48,7 +48,7 @@ private:
 	wchar_t * header;
 
 	//Biến lưu giữ kích thước cần tải về.
-	UINT downloadSize;
+	ULONGLONG downloadSize;
 
 	//Biến lưu giữ đường dẫn đến nơi tải về.
 	wchar_t* pathToFile = nullptr;
@@ -68,7 +68,7 @@ public:
 
 	bool SetupDownload();
 	InternetDownloadStatus CheckStatusAndReadData();
-	bool UnpackDownloadedFile();
+	bool UnpackDownloadedFile(wchar_t* pathToZippedFile, wchar_t* pathToUnzipFolder);
 	bool TerminateDownload();
 
 private:
