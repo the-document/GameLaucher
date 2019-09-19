@@ -39,3 +39,8 @@
 *.idb
 *.ilk
 *.pdb
+*.log
+*.tlog
+*.idb
+*.pdb
+*.ilk
