@@ -19,11 +19,14 @@ public:
 
 public:
 	int index=-1;
-	int height_line=20;
+	int height_line=15;
 	CFont font;
 protected:
 	
 public:
 	afx_msg void OnPaint();
+
+protected:
+	afx_msg LRESULT OnSettext(WPARAM wParam, LPARAM lParam);
 };
 

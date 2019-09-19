@@ -15,12 +15,19 @@ public:
 	LPWSTR groupUrl;
 	LPWSTR exitUrl;
 
-	char* PatchInfo;
-	char* NewLauncher;
+	wchar_t* PatchInfo;
+	wchar_t* NewLauncher;
 	char* LoginServer;
 	char* Help_URL;
 
 	char *FVersion = "..\\(version)"; // File (version)
-	char *FPatchInfo = "..\\Patch\\patchinfo.txt"; // File patchinfo.txt
+	//wchar_t* FPatchInfo = L"..\\Patch\\patchinfo.txt"; // File patchinfo.txt
+	char* FPatchInfo = "..\\Patch\\patchinfo.txt";
+	wchar_t* FPatchLaucher = L"..\\Patch\\newlaunch.zip";
+	char* FLaunchVersion = "./(LaunchVersion)"; // File (LaunchVersion)
+
+	wchar_t* URL1;
+
+	void SetUrl1(wchar_t*);
 };
 

@@ -183,6 +183,7 @@
     <ClInclude Include="LaunchHome.h" />
     <ClInclude Include="LaunchHomeDlg.h" />
     <ClInclude Include="MyButton.h" />
+    <ClInclude Include="MyParam.h" />
     <ClInclude Include="MySettings.h" />
     <ClInclude Include="MyText.h" />
     <ClInclude Include="Resource.h" />
