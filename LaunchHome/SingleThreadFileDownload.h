@@ -38,8 +38,11 @@ private:
 	//Biến lưu giữ URL cần tải về.
 	wchar_t * url = nullptr;
 
-	//Biến báo hiệu URL không hợp lệ.
+	//Biến báo hiệu URL không hợp lệ. Chỉ được set = true, không được set = false.
 	bool invalidURL = false;
+
+	//Biến báo hiệu đã bị lỗi ở chỗ nào đó trong quá trình connect và không thể tiếp tục. Chỉ được set = true, không được set = false.
+	bool timedOutSomewhere = false;
 
 	//Biến lưu giữ kết nối đến URL.
 	HINTERNET connection;
