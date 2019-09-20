@@ -24,10 +24,12 @@ public:
 	//wchar_t* FPatchInfo = L"..\\Patch\\patchinfo.txt"; // File patchinfo.txt
 	char* FPatchInfo = "..\\Patch\\patchinfo.txt";
 	wchar_t* FPatchLaucher = L"..\\Patch\\newlaunch.zip";
+	wchar_t* PathFolder = L"..\\Patch";
 	char* FLaunchVersion = "./(LaunchVersion)"; // File (LaunchVersion)
 
 	wchar_t* URL1;
 
 	void SetUrl1(wchar_t*);
+	
 };
 

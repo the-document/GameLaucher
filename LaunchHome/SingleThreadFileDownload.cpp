@@ -141,7 +141,7 @@ bool SingleThreadFileDownload::UnpackDownloadedFile(wchar_t* pathToZippedFile, w
 	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
 	ShExecInfo.hwnd = NULL;
 	ShExecInfo.lpVerb = NULL;
-	ShExecInfo.lpFile = _T("Unpack.exe");
+	ShExecInfo.lpFile = _T("D:\\IT\\Project customer\\LaunchGame\\GameLaucher\\Debug\\Unpack.exe");
 
 	//Command extract
 	WCHAR cmd[MAX_PATH + MAX_PATH];
