@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "SingleThreadFileDownload.h"
-
+#include<zip.h>
+#define _WIN32
 ////Biến lưu giữ các event đánh dấu trạng thái.
 //std::unordered_map<HINTERNET, HANDLE> hConnectEvent;
 //std::unordered_map<HINTERNET, HANDLE> hRequestOpenEvent;
@@ -127,42 +128,24 @@ bool SingleThreadFileDownload::TerminateDownload()
 
 bool SingleThreadFileDownload::UnpackDownloadedFile(wchar_t* pathToZippedFile, wchar_t* pathToUnzipFolder)
 {
-	//CString cstring;
-	//CT2A ascii(cstring);
-	//char *url = ascii.m_psz;
-	//char *file_name = strrchr(url, '/') + 1;
-	//cstring = _T("Extracting file... ");
-	//cstring += file_name;
+	wchar_t pathToUnpackEXE[] = L"Utilities\\Unpack\\7za.exe";
+	//wchar_t pathToUnpackEXE[] = L"\"C:\\Users\\Nguyen Hong Phuc\\Downloads\\7z\\7za.exe\"";
+	wchar_t parameter[250];
+	wcscpy(parameter, L" x ");
+	wcscat(parameter, L"\"");
+	wcscat(parameter, pathToZippedFile);
+	wcscat(parameter, L"\"");
+	wcscat(parameter, L" -aoa");
+	wcscat(parameter, L" -o");
+	wcscat(parameter, L"\"");
+	wcscat(parameter, pathToUnzipFolder);
+	wcscat(parameter, L"\"");
 
-	//CString unpack_path;
-	// Giải nén file .zip
-	SHELLEXECUTEINFO ShExecInfo = { 0 };
-	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	ShExecInfo.hwnd = NULL;
-	ShExecInfo.lpVerb = NULL;
-	ShExecInfo.lpFile = _T("D:\\IT\\Project customer\\LaunchGame\\GameLaucher\\Debug\\Unpack.exe");
-
-	//Command extract
-	WCHAR cmd[MAX_PATH + MAX_PATH];
-	wcscpy(cmd, L" x ");
-	wcscat(cmd, pathToZippedFile);
-	wcscat(cmd, L" -o ");
-	wcscat(cmd, pathToUnzipFolder);
-	wcscat(cmd, L" -aoa");
-
-	//mbstowcs(wtext, text, strlen(text)+1);
-	ShExecInfo.lpParameters = cmd;
-
-	ShExecInfo.lpDirectory = NULL;
-	ShExecInfo.nShow = SW_HIDE;
-	ShExecInfo.hInstApp = NULL;
-	ShellExecuteEx(&ShExecInfo);
-	WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
-	/*cstring = unpack_path;*/
-	DeleteFile(pathToZippedFile);
-
-	//Reset busy status
+/*	ShellExecute(NULL, L"open", 
+		L"C:\\;Users\\Nguyen Hong Phuc\\Downloads\\7z\\7za.exe", 
+		L" x \"D:\\IT\\Project customer\\LaunchGame\\GameLaucher\\Patch\\Version5.zip\" -aoa -o\"D:\\IT\\Project customer\\LaunchGame\\GameLaucher\\Patch\\", 0, SW_NORMAL);
+	*/
+	ShellExecute(NULL, L"open", pathToUnpackEXE, parameter, NULL, SW_HIDE);
 	return TRUE;
 }
 
