@@ -78,7 +78,7 @@ SingleThreadFileDownload::SingleThreadFileDownload(HINTERNET _internet, const wc
 	if (!_internet)
 	{
 		_internet = NULL;
-		invalidURL = true;
+		timedOutSomewhere = true;
 	}
 	internet = _internet;
 
@@ -201,24 +201,25 @@ void SingleThreadFileDownload::GetFileSize()
 	if (!connectionResult)//&& error == ERROR_IO_PENDING)
 	{
 		std::cout << "\nConnect error !";
+		timedOutSomewhere = true;
 	}
 
-	
 	wchar_t headerBuffer[250];
+	wchar_t* pointerToHeaderBuffer = headerBuffer;
 	DWORD sizeOfFileSize = sizeof(headerBuffer); //Int.
 
-	while (!HttpQueryInfo(tempConn, HTTP_QUERY_CONTENT_LENGTH, headerBuffer, &sizeOfFileSize, NULL))
+	while (!HttpQueryInfo(tempConn, HTTP_QUERY_CONTENT_LENGTH, pointerToHeaderBuffer, &sizeOfFileSize, NULL))
 	{
 		DWORD errorCode = GetLastError();
 		if (errorCode == ERROR_INSUFFICIENT_BUFFER)
 		{
 			std::cout << "\nInsufficent File Size Buffer !";
-			downloadSize = 0;
-			break;
+			pointerToHeaderBuffer = new wchar_t[sizeOfFileSize];
 		}
 		else
 		{
 			downloadSize = 0;
+			timedOutSomewhere = true;
 			break;
 		}
 	}
@@ -239,6 +240,7 @@ void SingleThreadFileDownload::GetFileSize()
 			downloadSize = 0;
 			break;
 		}
+		timedOutSomewhere = true;
 	}
 
 	wchar_t rangeAcceptResponse[250];
@@ -257,6 +259,7 @@ void SingleThreadFileDownload::GetFileSize()
 			downloadSize = 0;
 			break;
 		}
+		timedOutSomewhere = true;
 	}
 	DWORD sizeOfLastModified = sizeof(lastModified);
 	while (!HttpQueryInfo(tempConn, HTTP_QUERY_LAST_MODIFIED, lastModified, &sizeOfLastModified, NULL))
@@ -273,6 +276,7 @@ void SingleThreadFileDownload::GetFileSize()
 			downloadSize = 0;
 			break;
 		}
+		timedOutSomewhere = true;
 	}
 
 	//Nếu server không hỗ trợ resume thì chỉnh biến cờ.
@@ -507,5 +511,5 @@ bool SingleThreadFileDownload::SetupDownload()
 		file.SeekToEnd();
 	else
 		file.SeekToBegin();
-	return true & invalidURL;
+	return (true && invalidURL && timedOutSomewhere);
 }
