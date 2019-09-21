@@ -494,5 +494,5 @@ bool SingleThreadFileDownload::SetupDownload()
 		file.SeekToEnd();
 	else
 		file.SeekToBegin();
-	return (true && invalidURL && timedOutSomewhere);
+	return (true && !invalidURL && !timedOutSomewhere);
 }
