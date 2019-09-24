@@ -179,6 +179,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CExplorer.h" />
     <ClInclude Include="InternetDownloadStatus.h" />
     <ClInclude Include="LaunchHome.h" />
     <ClInclude Include="LaunchHomeDlg.h" />
@@ -192,6 +193,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CExplorer.cpp" />
     <ClCompile Include="LaunchHome.cpp" />
     <ClCompile Include="LaunchHomeDlg.cpp" />
     <ClCompile Include="MyButton.cpp" />
