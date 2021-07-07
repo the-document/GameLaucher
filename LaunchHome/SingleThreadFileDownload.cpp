@@ -1,50 +1,51 @@
 ﻿#include "stdafx.h"
 #include "SingleThreadFileDownload.h"
+#include<zip.h>
+#define _WIN32
+////Biến lưu giữ các event đánh dấu trạng thái.
+//std::unordered_map<HINTERNET, HANDLE> hConnectEvent;
+//std::unordered_map<HINTERNET, HANDLE> hRequestOpenEvent;
+//std::unordered_map<HINTERNET, HANDLE> hRequestCompleteEvent;
+//
+//HANDLE globalHConnectEvent;
+//HANDLE globalHRequestOpenEvent;
+//HANDLE globalHRequestCompleteEvent;
 
-//Biến lưu giữ các event đánh dấu trạng thái.
-std::unordered_map<HINTERNET, HANDLE> hConnectEvent;
-std::unordered_map<HINTERNET, HANDLE> hRequestOpenEvent;
-std::unordered_map<HINTERNET, HANDLE> hRequestCompleteEvent;
+////Biến lưu giữ trạng thái handle.
+//INTERNET_ASYNC_RESULT* asyncResult;
 
-HANDLE globalHConnectEvent;
-HANDLE globalHRequestOpenEvent;
-HANDLE globalHRequestCompleteEvent;
-
-//Biến lưu giữ trạng thái handle.
-INTERNET_ASYNC_RESULT* asyncResult;
-
-void CALLBACK CallBack(
-	__in HINTERNET hInternet,
-	__in DWORD_PTR dwContext,
-	__in DWORD dwInternetStatus,
-	__in_bcount(dwStatusInformationLength) LPVOID lpvStatusInformation,
-	__in DWORD dwStatusInformationLength
-)
-{
-	InternetCookieHistory cookieHistory;
-
-	/*cout << "\nOK\n";*/
-	UNREFERENCED_PARAMETER(dwStatusInformationLength);
-	//fprintf(stderr, "\nCallback Received for Handle %p \t", hInternet);
-	if (hConnectEvent[hInternet] == NULL)
-		hConnectEvent[hInternet] = CreateEvent(NULL, FALSE, FALSE, NULL);
-	switch (dwInternetStatus)
-	{
-		case INTERNET_STATUS_HANDLE_CREATED:
-		{
-			SetEvent(globalHConnectEvent);
-			SetEvent(hConnectEvent[hInternet]);
-			break;
-		}
-		case INTERNET_STATUS_REQUEST_COMPLETE:
-		{
-			SetEvent(globalHRequestCompleteEvent);
-			SetEvent(hRequestCompleteEvent[hInternet]);
-			asyncResult = (INTERNET_ASYNC_RESULT*)lpvStatusInformation;
-			break;
-		}
-	}
-}
+//void CALLBACK CallBack(
+//	__in HINTERNET hInternet,
+//	__in DWORD_PTR dwContext,
+//	__in DWORD dwInternetStatus,
+//	__in_bcount(dwStatusInformationLength) LPVOID lpvStatusInformation,
+//	__in DWORD dwStatusInformationLength
+//)
+//{
+//	InternetCookieHistory cookieHistory;
+//
+//	/*cout << "\nOK\n";*/
+//	UNREFERENCED_PARAMETER(dwStatusInformationLength);
+//	//fprintf(stderr, "\nCallback Received for Handle %p \t", hInternet);
+//	if (hConnectEvent[hInternet] == NULL)
+//		hConnectEvent[hInternet] = CreateEvent(NULL, FALSE, FALSE, NULL);
+//	switch (dwInternetStatus)
+//	{
+//		case INTERNET_STATUS_HANDLE_CREATED:
+//		{
+//			SetEvent(globalHConnectEvent);
+//			SetEvent(hConnectEvent[hInternet]);
+//			break;
+//		}
+//		case INTERNET_STATUS_REQUEST_COMPLETE:
+//		{
+//			SetEvent(globalHRequestCompleteEvent);
+//			SetEvent(hRequestCompleteEvent[hInternet]);
+//			asyncResult = (INTERNET_ASYNC_RESULT*)lpvStatusInformation;
+//			break;
+//		}
+//	}
+//}
 
 SingleThreadFileDownload::SingleThreadFileDownload(HINTERNET _internet, const wchar_t* _url, const wchar_t* _pathToFile,
 	ULONGLONG _beginRange, ULONGLONG _endRange
@@ -68,31 +69,32 @@ SingleThreadFileDownload::SingleThreadFileDownload(HINTERNET _internet, const wc
 		sprintf_s(agentStr, "Agent%ld", timeGetTime());
 		if ((internetFlag & INTERNET_CONNECTION_PROXY))
 		{
-			_internet = InternetOpenA(agentStr, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, INTERNET_FLAG_ASYNC);
+			_internet = InternetOpenA(agentStr, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 		}
 		else
 		{
-			_internet = InternetOpenA(agentStr, INTERNET_OPEN_TYPE_PRECONFIG_WITH_NO_AUTOPROXY, NULL, NULL, INTERNET_FLAG_ASYNC);
+			_internet = InternetOpenA(agentStr, INTERNET_OPEN_TYPE_PRECONFIG_WITH_NO_AUTOPROXY, NULL, NULL, 0);
 		}
 	}
 	if (!_internet)
 	{
 		_internet = NULL;
+		timedOutSomewhere = true;
 	}
 	internet = _internet;
 
-	globalHConnectEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	globalHRequestOpenEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	globalHRequestCompleteEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	//globalHConnectEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	//globalHRequestOpenEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	//globalHRequestCompleteEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	INTERNET_STATUS_CALLBACK CallbackPointer;
+	/*INTERNET_STATUS_CALLBACK CallbackPointer;
 	CallbackPointer = InternetSetStatusCallback(internet, (INTERNET_STATUS_CALLBACK)CallBack);
 
 	if (CallbackPointer == INTERNET_INVALID_STATUS_CALLBACK)
 	{
 		fprintf(stderr, "InternetSetStatusCallback failed with INTERNET_INVALID_STATUS_CALLBACK\n");
 	}
-
+*/
 	//Lấy dung lượng cần tải về (sau khi tạo header).
 	GetFileSize();
 
@@ -126,42 +128,24 @@ bool SingleThreadFileDownload::TerminateDownload()
 
 bool SingleThreadFileDownload::UnpackDownloadedFile(wchar_t* pathToZippedFile, wchar_t* pathToUnzipFolder)
 {
-	//CString cstring;
-	//CT2A ascii(cstring);
-	//char *url = ascii.m_psz;
-	//char *file_name = strrchr(url, '/') + 1;
-	//cstring = _T("Extracting file... ");
-	//cstring += file_name;
+	wchar_t pathToUnpackEXE[] = L"Utilities\\Unpack\\7za.exe";
+	//wchar_t pathToUnpackEXE[] = L"\"C:\\Users\\Nguyen Hong Phuc\\Downloads\\7z\\7za.exe\"";
+	wchar_t parameter[250];
+	wcscpy(parameter, L" x ");
+	wcscat(parameter, L"\"");
+	wcscat(parameter, pathToZippedFile);
+	wcscat(parameter, L"\"");
+	wcscat(parameter, L" -aoa");
+	wcscat(parameter, L" -o");
+	wcscat(parameter, L"\"");
+	wcscat(parameter, pathToUnzipFolder);
+	wcscat(parameter, L"\"");
 
-	//CString unpack_path;
-	// Giải nén file .zip
-	SHELLEXECUTEINFO ShExecInfo = { 0 };
-	ShExecInfo.cbSize = sizeof(SHELLEXECUTEINFO);
-	ShExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-	ShExecInfo.hwnd = NULL;
-	ShExecInfo.lpVerb = NULL;
-	ShExecInfo.lpFile = _T("Unpack.exe");
-
-	//Command extract
-	WCHAR cmd[MAX_PATH + MAX_PATH];
-	wcscpy(cmd, L" x ");
-	wcscat(cmd, pathToZippedFile);
-	wcscat(cmd, L" -o ");
-	wcscat(cmd, pathToUnzipFolder);
-	wcscat(cmd, L" -aoa");
-
-	//mbstowcs(wtext, text, strlen(text)+1);
-	ShExecInfo.lpParameters = cmd;
-
-	ShExecInfo.lpDirectory = NULL;
-	ShExecInfo.nShow = SW_HIDE;
-	ShExecInfo.hInstApp = NULL;
-	ShellExecuteEx(&ShExecInfo);
-	WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
-	/*cstring = unpack_path;*/
-	DeleteFile(pathToZippedFile);
-
-	//Reset busy status
+/*	ShellExecute(NULL, L"open", 
+		L"C:\\;Users\\Nguyen Hong Phuc\\Downloads\\7z\\7za.exe", 
+		L" x \"D:\\IT\\Project customer\\LaunchGame\\GameLaucher\\Patch\\Version5.zip\" -aoa -o\"D:\\IT\\Project customer\\LaunchGame\\GameLaucher\\Patch\\", 0, SW_NORMAL);
+	*/
+	ShellExecute(NULL, L"open", pathToUnpackEXE, parameter, NULL, SW_HIDE);
 	return TRUE;
 }
 
@@ -193,40 +177,32 @@ void SingleThreadFileDownload::GetFileSize()
 	//Options cho việc mở kết nối với URL.
 	DWORD connectionOptions = INTERNET_FLAG_NEED_FILE | INTERNET_FLAG_HYPERLINK | INTERNET_FLAG_RESYNCHRONIZE | INTERNET_FLAG_RELOAD;
 	retryGetFileSize:
-	bool connectionResult = tempConn = InternetOpenUrlW(internet, url, NULL, NULL, connectionOptions, 1);
+	bool connectionResult = tempConn = InternetOpenUrlW(internet, url, NULL, NULL, connectionOptions, 0);
 
 	DWORD error = GetLastError();
 	//Chờ đến khi nào nhận được handle connection.
-	if (!connectionResult && error == ERROR_IO_PENDING)
+	if (!connectionResult)//&& error == ERROR_IO_PENDING)
 	{
-		if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
-		{
-			std::cout << "\nRequest timeout for getting content length !";
-			goto retryGetFileSize;
-		}
-		else
-		{
-			std::cout << "\nRequest completed successfully !";
-			tempConn = (HINTERNET)(asyncResult->dwResult);
-		}
+		std::cout << "\nConnect error !";
+		timedOutSomewhere = true;
 	}
 
-	
 	wchar_t headerBuffer[250];
+	wchar_t* pointerToHeaderBuffer = headerBuffer;
 	DWORD sizeOfFileSize = sizeof(headerBuffer); //Int.
 
-	while (!HttpQueryInfo(tempConn, HTTP_QUERY_CONTENT_LENGTH, headerBuffer, &sizeOfFileSize, NULL))
+	while (!HttpQueryInfo(tempConn, HTTP_QUERY_CONTENT_LENGTH, pointerToHeaderBuffer, &sizeOfFileSize, NULL))
 	{
 		DWORD errorCode = GetLastError();
 		if (errorCode == ERROR_INSUFFICIENT_BUFFER)
 		{
 			std::cout << "\nInsufficent File Size Buffer !";
-			downloadSize = 0;
-			break;
+			pointerToHeaderBuffer = new wchar_t[sizeOfFileSize];
 		}
 		else
 		{
 			downloadSize = 0;
+			timedOutSomewhere = true;
 			break;
 		}
 	}
@@ -247,7 +223,9 @@ void SingleThreadFileDownload::GetFileSize()
 			downloadSize = 0;
 			break;
 		}
+		timedOutSomewhere = true;
 	}
+
 	wchar_t rangeAcceptResponse[250];
 	DWORD sizeOfAcceptResponse = sizeof(rangeAcceptResponse);
 	while (!HttpQueryInfo(tempConn, HTTP_QUERY_ACCEPT_RANGES, rangeAcceptResponse, &sizeOfAcceptResponse, NULL))
@@ -264,6 +242,7 @@ void SingleThreadFileDownload::GetFileSize()
 			downloadSize = 0;
 			break;
 		}
+		timedOutSomewhere = true;
 	}
 	DWORD sizeOfLastModified = sizeof(lastModified);
 	while (!HttpQueryInfo(tempConn, HTTP_QUERY_LAST_MODIFIED, lastModified, &sizeOfLastModified, NULL))
@@ -280,6 +259,7 @@ void SingleThreadFileDownload::GetFileSize()
 			downloadSize = 0;
 			break;
 		}
+		timedOutSomewhere = true;
 	}
 
 	//Nếu server không hỗ trợ resume thì chỉnh biến cờ.
@@ -301,31 +281,35 @@ void SingleThreadFileDownload::MakeConnection()
 	bool connectionResult;
 	retryMakeConnection:
 	if (header != NULL)
-		connectionResult = connection = InternetOpenUrlW(internet, url, header, -1L, connectionOptions, 1);
+		connectionResult = connection = InternetOpenUrlW(internet, url, header, -1L, connectionOptions, 0);
 	else
-		connectionResult = connection = InternetOpenUrlW(internet, url, NULL, NULL, connectionOptions, 1);
+		connectionResult = connection = InternetOpenUrlW(internet, url, NULL, NULL, connectionOptions, 0);
 
 	//Biến lưu lại lỗi.
-	DWORD error = GetLastError();
-	if (!connectionResult && error == ERROR_IO_PENDING)
+	//DWORD error = GetLastError();
+	//if (!connectionResult && error == ERROR_IO_PENDING)
+	//{
+	//	if (WaitForSingleObject(globalHConnectEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
+	//	{
+	//		std::cout << "\nTimeout for connection " << " in connecting event !";
+	//	}
+	//	if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
+	//	{
+	//		std::cout << "\nTimeout for connection " << " in completing request event !";
+	//		goto retryMakeConnection;
+	//	}
+	//	else
+	//	{
+	//		connection = (HINTERNET)(asyncResult->dwResult);
+	//		std::cout << "\nConnection " << " : " << connection << "\n\n\n";
+	//	}
+	//}
+	if (!connectionResult)
 	{
-		if (WaitForSingleObject(globalHConnectEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
-		{
-			std::cout << "\nTimeout for connection " << " in connecting event !";
-		}
-		if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
-		{
-			std::cout << "\nTimeout for connection " << " in completing request event !";
-			goto retryMakeConnection;
-		}
-		else
-		{
-			connection = (HINTERNET)(asyncResult->dwResult);
-			std::cout << "\nConnection " << " : " << connection << "\n\n\n";
-		}
-	}
-	else
+		std::cout << "\nConnection error !";
 		connection = NULL;
+		invalidURL = true;
+	}
 }
 
 void SingleThreadFileDownload::ProcessRange()
@@ -424,26 +408,24 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 
 	//Vòng lặp dùng để lấy dữ liệu về và ghi vào file.
 	bool result;
-	INTERNET_BUFFERS buffer;
-	memset(&buffer, 0, sizeof(buffer));
-	buffer.dwStructSize = sizeof(buffer);
-	buffer.lpvBuffer = lpBuffer;
-	buffer.dwBufferLength = dwSize - 1;
-	if (!(result = InternetReadFileEx(connection, &buffer, IRF_ASYNC, 1)))
+	DWORD readedBytes = 0;
+	
+	if (!(result = InternetReadFile(connection, lpBuffer, dwSize, &readedBytes)))
 	{
 		DWORD error = GetLastError();
 		if (error == ERROR_IO_PENDING)
 		{
-			if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
-			{
-				std::cout << "\nTimeout at downloading at connection : " + 0 << " ! ";
-				returnResult.statusCode = StatusCode::TimedOutReadingData;
-				return returnResult;
-			}
-			else
-			{
-				std::cout << "\nNOOOOOOOOOOOO\n\n\n";
-			}
+			//if (WaitForSingleObject(globalHRequestCompleteEvent, dwDefaultTimeout) == WAIT_TIMEOUT)
+			//{
+			//	std::cout << "\nTimeout at downloading at connection : " + 0 << " ! ";
+			//	
+			//}
+			//else
+			//{
+			//	std::cout << "\nNOOOOOOOOOOOO\n\n\n";
+			//}
+			returnResult.statusCode = StatusCode::TimedOutReadingData;
+			return returnResult;
 		}
 		else
 		{
@@ -455,7 +437,7 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 	//Tải được rồi thì phải reset đi chớ.
 	//ResetEvent(hRequestCompleteEvent[connection]);
 
-	if (!result && buffer.dwBufferLength == 0)
+	if (!result && readedBytes == 0)
 	{
 		returnResult.downloadedBytes = returnResult.totalBytes;
 		returnResult.downloadedPercent = 100.0;
@@ -466,13 +448,13 @@ InternetDownloadStatus SingleThreadFileDownload::CheckStatusAndReadData()
 	//Ghi vào file.
 	try
 	{
-		file.Write(lpBuffer, buffer.dwBufferLength);
+		file.Write(lpBuffer, readedBytes);
 	}
 	catch (...)
 	{
 		std::cout << "\nCannot write file. Maybe disk full ?\n";
 	}
-	downloadedBytes += buffer.dwBufferLength;
+	downloadedBytes += readedBytes;
 	returnResult.totalBytes = downloadSize;
 	returnResult.downloadedBytes = downloadedBytes;
 	returnResult.downloadedPercent = 100 * (double)returnResult.downloadedBytes / (double)returnResult.totalBytes;
@@ -512,5 +494,5 @@ bool SingleThreadFileDownload::SetupDownload()
 		file.SeekToEnd();
 	else
 		file.SeekToBegin();
-	return true & invalidURL;
+	return (true && !invalidURL && !timedOutSomewhere);
 }

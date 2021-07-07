@@ -45,6 +45,12 @@
     <ClInclude Include="SingleThreadFileDownload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyParam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CExplorer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LaunchHome.cpp">
@@ -66,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SingleThreadFileDownload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CExplorer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,5 +155,6 @@
     <None Include="resource.hm">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

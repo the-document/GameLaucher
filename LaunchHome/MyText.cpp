@@ -19,6 +19,7 @@ MyText::MyText()
 		DEFAULT_QUALITY,           // nQuality
 		DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
 		_T("Arial"));                 // lpszFacename
+	
 }
 
 
@@ -33,6 +34,7 @@ void MyText::SetTextColor(COLORREF color)
 BEGIN_MESSAGE_MAP(MyText, CStatic)
 	ON_WM_CTLCOLOR_REFLECT()
 	ON_WM_PAINT()
+	ON_MESSAGE(WM_SETTEXT, &MyText::OnSettext)
 END_MESSAGE_MAP()
 
 
@@ -52,7 +54,20 @@ HBRUSH MyText::CtlColor(CDC* pDC, UINT /*nCtlColor*/)
 void MyText::OnPaint()
 {
 	this->SetFont(&font, false);
+	
 	CStatic::OnPaint(); // device context for painting
 					   // TODO: Add your message handler code here
 					   // Do not call CStatic::OnPaint() for painting messages
+}
+
+
+afx_msg LRESULT MyText::OnSettext(WPARAM wParam, LPARAM lParam)
+{
+	LRESULT Result = Default();
+	CRect Rect;
+	GetWindowRect(&Rect);
+	GetParent()->ScreenToClient(&Rect);
+	GetParent()->InvalidateRect(&Rect);
+	GetParent()->UpdateWindow();
+	return Result;
 }
